@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Credit Card Creator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; 
+        }
+
+        .credit-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            perspective: 1000px;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .credit-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1.5rem; 
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        .card-chip {
+            background-color: #ffd700;
+            fill: #ffd700;
+        }
+
+        #card-number-display {
+            font-size: 1.8rem; 
+            white-space: nowrap;
+            overflow: hidden;
+            min-height: 1.8em; 
+        }
+
+        #card-name-display {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%; 
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl flex flex-col lg:flex-row gap-8">
+
+        <div class="lg:w-1/2 flex flex-col justify-center items-center">
+            <div id="card" class="credit-card rounded-3xl w-full max-w-sm h-56 p-6 flex flex-col justify-between cursor-pointer">
+                <div id="card-inner" class="credit-card-inner">
+                    <div id="card-front" class="card-face p-6 text-white text-left flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <svg class="w-10 h-8 card-chip rounded-md" viewBox="0 0 50 40">
+                                <rect width="50" height="40" rx="4" ry="4" class="card-chip"></rect>
+                                <circle cx="25" cy="20" r="5" fill="#f8f9fa"></circle>
+                            </svg>
+                            <span class="text-xl font-bold italic opacity-80">AURORA</span>
+                        </div>
+
+                        <div class="mt-4">
+                            <p id="card-number-display" class="font-mono text-3xl tracking-normal text-shadow-md">
+                                0000000000000000
+                            </p>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-auto text-sm">
+                            <div>
+                                <p class="uppercase text-xs opacity-60">Card Holder</p>
+                                <p id="card-name-display" class="uppercase font-medium tracking-wide break-words max-w-[150px] overflow-hidden whitespace-nowrap">
+                                    Jane Doe
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="uppercase text-xs opacity-60">Expires</p>
+                                <p id="card-expiry-display" class="font-mono tracking-wider">
+                                    MM/YY
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="card-back" class="card-back p-6 text-white text-right card-face flex flex-col justify-start">
+                        <div class="w-full h-12 bg-black mt-4 rounded-sm"></div>
+                        <div class="mt-6">
+                            <p class="uppercase text-xs opacity-60 text-left">Security Code</p>
+                            <div class="w-full h-10 bg-gray-200 rounded-lg flex items-center justify-end pr-3">
+                                <span id="card-cvv-display" class="text-lg font-mono text-gray-900">
+                                    ***
+                                </span>
+                            </div>
+                        </div>
+                        <p class="text-xs mt-4 opacity-50">This card is a non-functional demonstration model.</p>
+                    </div>
+
+                </div>
+            </div>
+            <p class="mt-2 text-center text-sm text-gray-500 lg:hidden">Tap the card to flip it.</p>
+
+            <button type="button" onclick="downloadCardAsImage()"
+                    class="mt-6 bg-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-700 transition duration-200 shadow-md">
+                Download Card
+            </button>
+        </div>
+
+        <div class="lg:w-1/2 bg-white p-6 rounded-xl shadow-lg">
+
+            <div class="bg-red-500 text-white p-4 rounded-lg mb-6 shadow-md border-2 border-red-700">
+                <p class="text-sm font-semibold tracking-wide uppercase">
+                    X WARNING: Do not enter your real credit card details here.
+                </p>
+                <p class="text-xs mt-1">
+                    This tool is for demonstration purposes only.
+                </p>
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Fake Card Details</h2>
+
+            <form id="card-form" onsubmit="return false;">
+                <div class="mb-4">
+                    <label for="card-number" class="block text-sm font-medium text-gray-700 mb-1">Card Number (16 Digits)</label>
+                    <input type="text" id="card-number" name="card-number" maxlength="16"
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg font-mono"
+                           placeholder="0000000000000000" oninput="updateCardNumber(this.value)">
+                </div>
+
+                <div class="mb-4">
+                    <label for="card-name" class="block text-sm font-medium text-gray-700 mb-1">Card Holder Name</label>
+                    <input type="text" id="card-name" name="card-name" maxlength="26"
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg uppercase"
+                           placeholder="JANE DOE" oninput="updateCardName(this.value)">
+                </div>
+
+                <div class="flex space-x-4 mb-6">
+                    <div class="w-1/4">
+                        <label for="expiry-month" class="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                        <select id="expiry-month" name="expiry-month" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg"
+                                onchange="updateCardExpiry()">
+                            <option value="MM" disabled selected>MM</option>
+                            </select>
+                    </div>
+
+                    <div class="w-1/4">
+                        <label for="expiry-year" class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                        <select id="expiry-year" name="expiry-year" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg"
+                                onchange="updateCardExpiry()">
+                            <option value="YY" disabled selected>YY</option>
+                            </select>
+                    </div>
+
+                    <div class="w-1/2">
+                        <label for="card-cvv" class="block text-sm font-medium text-gray-700 mb-1">CVV (3 or 4 Digits)</label>
+                        <input type="password" id="card-cvv" name="card-cvv" maxlength="4"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg font-mono"
+                               placeholder="***" oninput="updateCardCVV(this.value)">
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button type="button" onclick="generateFakeCardData()"
+                            class="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition duration-200 shadow-md">
+                        Generate Random Data
+                    </button>
+                    <button type="button" onclick="resetForm()"
+                            class="flex-1 bg-gray-500 text-white py-3 rounded-xl font-semibold hover:bg-gray-600 transition duration-200 shadow-md">
+                        Clear Form
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const cardNumberDisplay = document.getElementById('card-number-display');
+        const cardNameDisplay = document.getElementById('card-name-display');
+        const cardExpiryDisplay = document.getElementById('card-expiry-display');
+        const cardCVVDisplay = document.getElementById('card-cvv-display');
+        const expiryMonthSelect = document.getElementById('expiry-month');
+        const expiryYearSelect = document.getElementById('expiry-year');
+        const cardNumberInput = document.getElementById('card-number');
+        const cardNameInput = document.getElementById('card-name');
+        const cardCVVInput = document.getElementById('card-cvv');
+        const cardInner = document.getElementById('card-inner');
+        const cardElement = document.getElementById('card');
+
+        function generateFakeNumber() {
+            let number = '4'; 
+            for (let i = 1; i < 16; i++) {
+                number += Math.floor(Math.random() * 10);
+            }
+            return number;
+        }
+
+        function resetForm() {
+            document.getElementById('card-form').reset();
+            updateCardNumber('');
+            updateCardName('');
+            expiryMonthSelect.value = 'MM';
+            expiryYearSelect.value = 'YY';
+            updateCardExpiry();
+            updateCardCVV('');
+            cardInner.style.transform = 'rotateY(0deg)'; 
+        }
+
+        function generateFakeCardData() {
+            const fakeNumber = generateFakeNumber();
+            cardNumberInput.value = formatCardNumber(fakeNumber);
+            updateCardNumber(cardNumberInput.value);
+
+            cardNameInput.value = "John Smith";
+            updateCardName(cardNameInput.value);
+
+            const currentYear = new Date().getFullYear();
+            const startYear = currentYear % 100;
+            const randomYear = startYear + Math.floor(Math.random() * 5);
+            const randomMonth = (Math.floor(Math.random() * 12) + 1).toString().padStart(2, '0');
+
+            expiryMonthSelect.value = randomMonth;
+            expiryYearSelect.value = randomYear.toString();
+            updateCardExpiry();
+
+            cardCVVInput.value = Math.floor(100 + Math.random() * 900).toString();
+            updateCardCVV(cardCVVInput.value);
+
+            cardInner.style.transform = 'rotateY(0deg)'; 
+        }
+
+        function createCardSide(side) {
+            const div = document.createElement('div');
+
+            div.style.cssText = 'width: 384px; height: 224px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; color: white; border-radius: 1.5rem; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);';
+
+            if (side === 'front') {
+                div.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)';
+
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+
+                        <svg class="w-10 h-8 rounded-md" viewBox="0 0 50 40" style="background-color: #ffd700; fill: #ffd700;">
+                            <rect width="50" height="40" rx="4" ry="4" style="fill: #ffd700;"></rect>
+                            <circle cx="25" cy="20" r="5" fill="#f8f9fa"></circle>
+                        </svg>
+
+                        <span style="font-size: 1.25rem; font-weight: 700; font-style: italic; opacity: 0.8;">AURORA</span>
+                    </div>
+                    <div style="margin-top: 1rem;">
+
+                        <p style="font-family: monospace; font-size: 1.8rem; letter-spacing: 0.05em;">
+                            ${cardNumberDisplay.textContent}
+                        </p>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem;">
+                        <div>
+                            <p style="text-transform: uppercase; font-size: 0.75rem; opacity: 0.6;">Card Holder</p>
+                            <p style="text-transform: uppercase; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${cardNameDisplay.textContent}
+                            </p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="text-transform: uppercase; font-size: 0.75rem; opacity: 0.6;">Expires</p>
+                            <p style="font-family: monospace; letter-spacing: 0.1em;">
+                                ${cardExpiryDisplay.textContent}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else { 
+                div.style.background = 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)';
+
+                div.innerHTML = `
+                    <div style="width: 100%; height: 3rem; background-color: black; margin-top: 1rem; border-radius: 2px;"></div>
+                    <div style="margin-top: 1.5rem;">
+                        <p style="text-transform: uppercase; font-size: 0.75rem; opacity: 0.6; text-align: left;">Security Code</p>
+                        <div style="width: 100%; height: 2.5rem; background-color: #e5e7eb; border-radius: 0.5rem; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.75rem;">
+                            <span style="font-size: 1.125rem; font-family: monospace; color: #1f2937;">
+                                ${cardCVVDisplay.textContent}
+                            </span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.75rem; margin-top: 1rem; opacity: 0.5; text-align: right;">This card is a non-functional demonstration model.</p>
+                `;
+            }
+            return div;
+        }
+
+        function downloadCardAsImage() {
+
+            const tempContainer = document.createElement('div');
+            tempContainer.id = 'capture-container';
+            tempContainer.style.cssText = 'display: flex; gap: 40px; padding: 20px; background-color: #f3f4f6; position: absolute; left: -9999px;';
+
+            const cardFrontClone = createCardSide('front');
+            const cardBackClone = createCardSide('back');
+
+            tempContainer.appendChild(cardFrontClone);
+            tempContainer.appendChild(cardBackClone);
+            document.body.appendChild(tempContainer);
+
+            html2canvas(tempContainer, {
+                scale: 2, 
+                allowTaint: true,
+                useCORS: true,
+                backgroundColor: null 
+            }).then(function(canvas) {
+
+                const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+                const link = document.createElement('a');
+                link.download = 'fake_credit_card.png';
+                link.href = image;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                document.body.removeChild(tempContainer);
+            });
+        }
+
+        function formatCardNumber(value) {
+
+            return value.replace(/\D/g, '').substring(0, 16);
+        }
+
+        function updateCardNumber(value) {
+            const digits = formatCardNumber(value);
+            cardNumberInput.value = digits; 
+
+            const display = digits.padEnd(16, '0').substring(0, 16);
+            cardNumberDisplay.textContent = display; 
+        }
+
+        function updateCardName(value) {
+            const name = (value.toUpperCase() || 'JANE DOE');
+            cardNameDisplay.textContent = name;
+        }
+
+        function updateCardExpiry() {
+            const month = expiryMonthSelect.value.replace('MM', 'M').padEnd(2, 'M');
+            const year = expiryYearSelect.value.replace('YY', 'Y').padEnd(2, 'Y');
+            cardExpiryDisplay.textContent = `${month}/${year}`;
+        }
+
+        function updateCardCVV(value) {
+            const cvv = (value.replace(/\D/g, '') || '***').substring(0, 4);
+
+            cardCVVDisplay.textContent = cvv.padEnd(3, '*');
+
+            if (cvv.length > 0 && cvv !== '***') {
+                cardInner.style.transform = 'rotateY(180deg)';
+            }
+        }
+
+        function populateDropdowns() {
+
+            for (let i = 1; i <= 12; i++) {
+                const month = i.toString().padStart(2, '0');
+                const option = new Option(month, month);
+                expiryMonthSelect.add(option);
+            }
+
+            const currentYear = new Date().getFullYear();
+            for (let i = 0; i < 10; i++) {
+                const year = currentYear + i;
+                const shortYear = (year % 100).toString(); 
+                const option = new Option(year, shortYear);
+                expiryYearSelect.add(option);
+            }
+        }
+
+        let isFlipped = false;
+        cardElement.addEventListener('click', () => {
+            isFlipped = !isFlipped;
+            cardInner.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+        });
+
+        window.onload = function() {
+            populateDropdowns();
+
+            updateCardNumber('');
+            updateCardName('');
+            updateCardExpiry();
+            updateCardCVV('');
+        };
+    </script>
+</body>
+</html>
