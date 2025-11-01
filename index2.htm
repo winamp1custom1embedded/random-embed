@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Creator</title>
+    <!-- We are loading Tailwind CSS for utility classes like flex, margin, and padding -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /*
+        * CSS Explanations:
+        *
+        * We are using a dark, flat, 'Metro' (Windows 8) inspired design.
+        * - Background and panel colors are dark and high-contrast.
+        * - We use a vibrant blue (#00a2ed) for the primary interactive color.
+        * - Corners are kept sharp (no 'rounded-lg') for the classic Metro look.
+        */
+
+        :root {
+            /* Defining custom colors for the Win 8 aesthetic */
+            --bg-color: #1a1a1a;
+            --panel-color: #2d2d30;
+            --accent-color: #00a2ed;
+            --text-color: #ffffff;
+            --border-color: #3f3f46; /* A subtle border for structure */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* The main application window container */
+        .win8-window {
+            background-color: var(--panel-color);
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            min-height: 600px; /* Ensures visible space for the app */
+        }
+
+        /* Header styling for the title bar */
+        header {
+            background-color: var(--accent-color);
+            /* Removed padding, font-size, font-weight, text-transform here to use Tailwind classes directly on the element */
+        }
+
+        /* Input fields and select boxes */
+        input[type="text"],
+        select,
+        textarea {
+            background-color: #1e1e1e;
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            transition: border-color 0.15s ease-in-out;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        /* Focus state accent */
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* Textarea for main content */
+        textarea {
+            min-height: 300px;
+            resize: vertical;
+        }
+
+        /* The main action button (Download) */
+        .action-button {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            padding: 1rem 2rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .action-button:hover {
+            /* Darker shade on hover */
+            background-color: #007bb7;
+        }
+
+        .action-button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        /* Utility classes for labels */
+        .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* Responsive layout for the main content */
+        @media (min-width: 768px) {
+            .input-grid {
+                grid-template-columns: 1fr auto; /* Filename takes space, extension is small */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SEMANTIC HTML: Main container acting as the app window -->
+    <div class="win8-window">
+        
+        <!-- HEADER: Simulates the Windows 8 App Title Bar/App Bar -->
+        <!-- We use flex and items-center for vertical alignment. py-4 and px-6 add necessary padding. -->
+        <header class="flex items-center py-4 px-6 space-x-4">
+            <!-- App Icon/Logo Placeholder: A large letter 'F' in a square for a Metro look -->
+            <!-- The classes set the size (h-10 w-10), background, text color, and border to define the icon block. -->
+            <div class="text-2xl font-black leading-none p-1 border-2 border-white flex items-center justify-center h-10 w-10 bg-white text-blue-500">F</div>
+            
+            <!-- App Title -->
+            <!-- We use text-2xl for size, font-light for the signature minimal Metro look, and uppercase. -->
+            <h1 class="text-2xl font-light uppercase tracking-wider">FILE CREATOR STUDIO</h1>
+        </header>
+
+        <!-- MAIN: Contains the primary content and functionality -->
+        <main class="p-6 flex flex-col gap-6 flex-grow">
+
+            <!-- SECTION: Controls and Inputs Panel -->
+            <section class="flex flex-col gap-4">
+                <h2 class="text-xl font-light mb-2">File Details</h2>
+
+                <!-- Input Grid for Filename and Extension -->
+                <div class="input-grid grid gap-4 items-end">
+                    <!-- Filename Input -->
+                    <div class="flex flex-col">
+                        <label for="filename" class="label">Filename</label>
+                        <!-- input type="text" for alphanumeric file name -->
+                        <input type="text" id="filename" placeholder="my_new_document" class="w-full">
+                    </div>
+
+                    <!-- Extension Selector -->
+                    <div class="flex flex-col">
+                        <label for="extension" class="label">Extension</label>
+                        <!-- select dropdown for various extensions -->
+                        <select id="extension" class="h-full">
+                            <option value="txt">.txt (Plain Text)</option>
+                            <option value="html">.html (Web Page)</option>
+                            <option value="css">.css (Stylesheet)</option>
+                            <option value="js">.js (JavaScript)</option>
+                            <option value="md">.md (Markdown)</option>
+                            <option value="json">.json (JSON Data)</option>
+                            <!-- NEW OPTION: Custom extension -->
+                            <option value="custom">Custom...</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- NEW SECTION: Custom Extension Input Field (initially hidden) -->
+                <div id="customExtensionContainer" class="hidden flex flex-col pt-2">
+                    <label for="customExtension" class="label">Custom Extension</label>
+                    <!-- input type="text" for custom extension -->
+                    <input type="text" id="customExtension" placeholder="Enter extension without the dot (e.g., 'log', 'yaml', 'config')" class="w-full">
+                </div>
+                
+                <!-- Content Textarea -->
+                <div class="flex flex-col mt-4 flex-grow">
+                    <label for="content" class="label">File Content</label>
+                    <!-- textarea for large, multi-line user input -->
+                    <textarea id="content" placeholder="Type your file content here... HTML, CSS, JavaScript, or plain text." class="flex-grow"></textarea>
+                </div>
+            </section>
+
+            <!-- SECTION: Action Area (Footer-like) -->
+            <section class="mt-auto pt-4 border-t border-gray-700">
+                <!-- BUTTON: Primary action element to trigger the download -->
+                <button id="downloadButton" onclick="downloadFile()" class="action-button w-full">
+                    Download File
+                </button>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT: Logic to create and download the file -->
+    <script>
+        // DOM Element References (Using const for immutability)
+        const contentInput = document.getElementById('content');
+        const filenameInput = document.getElementById('filename');
+        const extensionSelect = document.getElementById('extension');
+        const downloadButton = document.getElementById('downloadButton');
+        
+        // NEW REFERENCES for Custom Extension
+        const customExtensionInput = document.getElementById('customExtension');
+        const customExtensionContainer = document.getElementById('customExtensionContainer');
+
+
+        /**
+         * Purpose: Updates the download button's disabled state based on content, filename, and custom extension presence.
+         */
+        function updateButtonState() {
+            const content = contentInput.value.trim();
+            const filename = filenameInput.value.trim();
+            const isCustomSelected = extensionSelect.value === 'custom';
+            
+            // Check if Custom is selected AND the custom input field is empty
+            const customExtFilled = isCustomSelected ? customExtensionInput.value.trim().length > 0 : true;
+
+            // Disable if content or filename is missing, OR if custom is selected but the input is empty
+            downloadButton.disabled = content.length === 0 || filename.length === 0 || !customExtFilled;
+        }
+
+        /**
+         * Purpose: Toggles the visibility of the custom extension input field.
+         */
+        function toggleCustomInput() {
+            if (extensionSelect.value === 'custom') {
+                // Remove the 'hidden' Tailwind class to show the input
+                customExtensionContainer.classList.remove('hidden');
+                customExtensionInput.focus();
+            } else {
+                // Add the 'hidden' Tailwind class to hide the input
+                customExtensionContainer.classList.add('hidden');
+            }
+            updateButtonState(); // Update button state after changing selection
+        }
+
+        // Attach event listeners to continuously check for input changes
+        contentInput.addEventListener('input', updateButtonState);
+        filenameInput.addEventListener('input', updateButtonState);
+        
+        // NEW: Listen for changes on the extension dropdown to toggle the custom input
+        extensionSelect.addEventListener('change', toggleCustomInput); 
+        
+        // NEW: Listen for input on the custom extension field for validation
+        customExtensionInput.addEventListener('input', updateButtonState);
+
+        // Initialize button state on load
+        updateButtonState();
+
+        /**
+         * Purpose: Handles the process of creating a file from user input and triggering a download.
+         */
+        function downloadFile() {
+            // 1. Retrieve user inputs
+            const content = contentInput.value;
+            const filenameBase = filenameInput.value.trim();
+            const selectedExtension = extensionSelect.value;
+            let finalExtension;
+            
+            if (selectedExtension === 'custom') {
+                // If custom is selected, use the text field value and clean it up (remove leading dots)
+                finalExtension = customExtensionInput.value.trim().replace(/^\./, '');
+            } else {
+                // Otherwise, use the selected option value
+                finalExtension = selectedExtension;
+            }
+
+            // Simple validation check (should be handled by button state, but good for robustness)
+            if (!content || !filenameBase || !finalExtension) {
+                console.error("Content, filename, and a valid extension are required to download.");
+                return;
+            }
+
+            // 2. Construct the full filename
+            const fullFilename = `${filenameBase}.${finalExtension}`;
+
+            // 3. Determine the MIME type based on the extension
+            let mimeType = 'text/plain'; // Default for custom or unknown types
+            switch (finalExtension) {
+                case 'html':
+                    mimeType = 'text/html';
+                    break;
+                case 'css':
+                    mimeType = 'text/css';
+                    break;
+                case 'js':
+                    mimeType = 'application/javascript';
+                    break;
+                case 'json':
+                    mimeType = 'application/json';
+                    break;
+                case 'md':
+                    mimeType = 'text/markdown';
+                    break;
+            }
+            // Note: For custom extensions, we default to 'text/plain'. The browser will handle the file extension.
+
+            // 4. Create a Blob (Binary Large Object) from the content
+            const blob = new Blob([content], { type: mimeType });
+
+            // 5. Create a temporary URL for the Blob
+            const url = URL.createObjectURL(blob);
+
+            // 6. Create a temporary <a> tag for the download action
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fullFilename; 
+            
+            // 7. Programmatically click the link to start the download
+            document.body.appendChild(a);
+            a.click();
+            
+            // 8. Clean up
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+    </script>
+</body>
+</html>
